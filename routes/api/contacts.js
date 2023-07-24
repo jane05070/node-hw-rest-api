@@ -8,12 +8,12 @@ const router = express.Router();
 
 router.get('/', contactsController.getAll);
 
-router.get('/:id', contactsController.getById);
+// router.get('/:id', contactsController.getById);
 
-router.post('/', validateBody(contactsSchemas.contactAddSchema), contactsController.add);
+// router.post('/', validateBody(contactsSchemas.contactAddSchema), contactsController.add);
 
-router.delete('/:id', contactsController.deleteById);
+// router.delete('/:id', contactsController.deleteById);
 
-router.put('/:id', validateBody(contactsSchemas.contactAddSchema), contactsController.updateById);
+// router.put('/:id', validateBody(contactsSchemas.contactAddSchema), contactsController.updateById);
 
 export default router;
