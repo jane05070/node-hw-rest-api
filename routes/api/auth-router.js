@@ -13,6 +13,8 @@ authRouter.post("/signin", validateBody(usersShemas.userSigninSchema), authContr
 
 authRouter.get("/current", authentificate, authController.getCurrent);
 
-authRouter.post("/signout", authentificate, authController.signout)
+authRouter.post("/signout", authentificate, authController.signout);
+
+authRouter.patch('/', authentificate, validateBody(usersShemas.userSigninSchema), authController.updateSubscriptionUser )
 
 export default authRouter;
