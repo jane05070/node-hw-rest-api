@@ -4,13 +4,15 @@ import { HttpError } from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
 
 const getAll = async (req, res) => {
- const {_id: owner} = req.body;
-  const result = await Contact.find({owner}, "");
+    const { _id: owner } = req.body;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+  const result = await Contact.find({owner}, "", {skip, limit}).populate("owner", "email");
   res.json(result);
 }
   
 const getById = async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params;   
     const result = await Contact.findById(id);
     if (!result) {
         throw HttpError(404, `Movie with id=${id} not found`);
