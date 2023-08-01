@@ -50,16 +50,17 @@ const signin = async(req, res) => {
 
     res.json({
         token,
+        user: { email: user.email, subscription: user.subscription },
     })
 
 }
 
 const getCurrent = (req, res) => {
-    const { name, email } = req.user;
+    const { email, subscription } = req.user;
 
     res.json({
-        name,
         email,
+        subscription
     })
 }
 
@@ -85,3 +86,6 @@ export default {
     updateSubscriptionUser: ctrlWrapper( updateSubscriptionUser),
 
 }
+
+
+

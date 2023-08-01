@@ -7,13 +7,13 @@ import { authentificate } from "../../middlewares/index.js"
 const authRouter = express.Router();
 
 
-authRouter.post("/signup", validateBody(usersShemas.userSignupSchema), authController.signup);
+authRouter.post("/register", validateBody(usersShemas.userSignupSchema), authController.signup);
 
-authRouter.post("/signin", validateBody(usersShemas.userSigninSchema), authController.signin);
+authRouter.post("/login", validateBody(usersShemas.userSigninSchema), authController.signin);
 
 authRouter.get("/current", authentificate, authController.getCurrent);
 
-authRouter.post("/signout", authentificate, authController.signout);
+authRouter.post("/logout", authentificate, authController.signout);
 
 authRouter.patch('/', authentificate, validateBody(usersShemas.userSigninSchema), authController.updateSubscriptionUser )
 
