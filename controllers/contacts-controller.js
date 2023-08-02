@@ -2,12 +2,13 @@
 import Contact from "../models/contact.js";
 import { HttpError } from "../helpers/index.js";
 import { ctrlWrapper } from "../decorators/index.js";
+import { query } from "express";
 
 const getAll = async (req, res) => {
-    const { _id: owner } = req.body;
-    const { page = 1, limit = 10 } = req.query;
+    const { _id: owner } = req.user;
+    const {page = 1, limit = 10, ...query} = req.query;
     const skip = (page - 1) * limit;
-  const result = await Contact.find({owner}, "", {skip, limit}).populate("owner", "email");
+  const result = await Contact.find({owner, query}, "", {skip, limit}).populate("owner", "email");
   res.json(result);
 }
   
@@ -67,3 +68,5 @@ export default {
     updateFavorite: ctrlWrapper(updateFavorite),
     deleteById: ctrlWrapper(deleteById),
 }
+
+
