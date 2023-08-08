@@ -23,7 +23,7 @@ const signup = async (req, res) => {
 
     const hashPassword = await bcrypt.hash(password, 10);
     const avatarURL = gravatar.url(email);
-    const newUser = await User.create({ ...req.body, password: hashPassword});
+    const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL});
     
 
     res.status(201).json({
@@ -86,23 +86,36 @@ const updateSubscriptionUser = async (req, res) => {
 }
 
 const updateAvatar = async (req, res) => {
-    const { _id } = req.user;
     const { path: oldPath, filename } = req.file;
+    const outputPath = path.resolve("temp", filename);
+    try {
+        const image = await Jimp.read(outputPath);
+        await image.resize(250, 250);
+        await image.writeAsync(outputPath);
+        req.file.path = outputPath;
+    } catch (error) {
+        throw HttpError(400, `${error.message}`);
+    }
+    
     const newPath = path.join(avatarPath, filename);
     await fs.rename(oldPath, newPath);
+    const url = path.join("avatars", filename);
 
-    const resizeFile = await Jimp.read(newPath);
-    await resizeFile.resize(250, 250).write(newPath);
+    const { _id } = req.user;
 
-    const avatarURL = path.join("avatars", filename);
+    const updateAvatar = await User.findByIdAndUpdate(
+        _id,
+        { avatarURL: url },
+        {
+            new: true,
+        }
+    );
+    if (!updateAvatar) {
+        throw HttpError(404, `User with id=${_id} is not found`);
+    }
+    res.json(updateAvatar);
+};
 
-   
-    await User.updateById(_id, { avatarURL });
-
-    res.json({
-        avatarURL,
-    })
-}
 
 export default {
     signup: ctrlWrapper(signup),
