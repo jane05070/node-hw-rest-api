@@ -4,8 +4,14 @@ import { ctrlWrapper } from "../decorators/index.js";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
 import jwt from "jsonwebtoken";
+import Jimp from 'jimp';
+import gravatar from 'gravatar';
+import fs from "fs/promises";
+import path from "path";
 
 const { JWT_SECRET } = process.env;
+
+const avatarPath = path.resolve("public", "avatars");
 
 
 const signup = async (req, res) => {
@@ -16,7 +22,8 @@ const signup = async (req, res) => {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ ...req.body, password: hashPassword});
+    const avatarURL = gravatar.url(email);
+    const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL});
     
 
     res.status(201).json({
@@ -78,12 +85,47 @@ const updateSubscriptionUser = async (req, res) => {
   res.json(result)
 }
 
+const updateAvatar = async (req, res) => {
+    const { path: oldPath, filename } = req.file;
+    const outputPath = path.resolve("temp", filename);
+    try {
+        const image = await Jimp.read(outputPath);
+        await image.resize(250, 250);
+        await image.writeAsync(outputPath);
+        req.file.path = outputPath;
+    } catch (error) {
+        throw HttpError(400, `${error.message}`);
+    }
+    
+    const newPath = path.join(avatarPath, filename);
+    await fs.rename(oldPath, newPath);
+    const url = path.join("avatars", filename);
+
+    const { _id } = req.user;
+
+    const updateAvatar = await User.findByIdAndUpdate(
+        _id,
+        { avatarURL: url },
+        {
+            new: true,
+        }
+    );
+    if (!updateAvatar) {
+        throw HttpError(404, `User with id=${_id} is not found`);
+    }
+    res.json({
+        avatarURL
+    });
+};
+
+
 export default {
     signup: ctrlWrapper(signup),
     signin: ctrlWrapper(signin),
     getCurrent: ctrlWrapper(getCurrent),
     signout: ctrlWrapper(signout),
-    updateSubscriptionUser: ctrlWrapper( updateSubscriptionUser),
+    updateSubscriptionUser: ctrlWrapper(updateSubscriptionUser),
+    updateAvatar: ctrlWrapper(updateAvatar)
 
 }
 
