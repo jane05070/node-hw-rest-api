@@ -23,14 +23,14 @@ const signup = async (req, res) => {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
-    const verificationCode = nanoid();
+    const verificationToken = nanoid();
     const avatarURL = gravatar.url(email);
-    const newUser = await User.create({ ...req.body, password: hashPassword, verificationCode, avatarURL });
+    const newUser = await User.create({ ...req.body, password: hashPassword, verificationToken, avatarURL });
     
     const verifiEmail = {
         to: email,
         subject: "Verify email",
-        html: `<a href="${BASE_URL}/api/auth/verify/${verificationCode}" target="_blank">Click verify email</a>`
+        html: `<a href="${BASE_URL}/api/auth/verify/${verificationToken}" target="_blank">Click verify email</a>`
     }
     await sendEmail(verifiEmail);
 
@@ -83,13 +83,13 @@ const getCurrent = (req, res) => {
 }
 
 const verify = async (req, res) => {
-    const { verificationCode } = req.params;
-    const user = await User.findOne({ verificationCode })
+    const { verificationToken } = req.params;
+    const user = await User.findOne({ verificationToken })
     
     if (!user) {
         throw HttpError(404, "User not found")
     }
-    await User.findByIdAndUpdate(user._id, { verify: true, verificationCode: "" });
+    await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: "" });
     res.json({ message: "Verification successful" });
 
 }
@@ -104,7 +104,7 @@ const resendVerifyEmail = async (req, res) => {
         to: email,
         subject: "Verify email",
         html: 
-            `<a href="${BASE_URL}/api/auth/verify/${user.verificationCode}" target="_blank">
+            `<a href="${BASE_URL}/api/auth/verify/${user.verificationToken}" target="_blank">
               CLICK on this link to verify your email </a>`
     };
 
