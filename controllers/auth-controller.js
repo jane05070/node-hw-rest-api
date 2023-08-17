@@ -14,6 +14,8 @@ const { JWT_SECRET, BASE_URL } = process.env;
 
 const avatarPath = path.resolve("public", "avatars");
 
+const verificationToken = nanoid();
+
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
@@ -84,7 +86,7 @@ const getCurrent = (req, res) => {
 
 const verify = async (req, res) => {
     const { verificationToken } = req.params;
-    const user = await User.findOne({ verificationToken })
+    const user = await User.findOne({ verificationToken });
     
     if (!user) {
         throw HttpError(404, "User not found")
